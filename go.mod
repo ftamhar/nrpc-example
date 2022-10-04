@@ -3,7 +3,7 @@ module example_nrpc
 go 1.19
 
 require (
-	github.com/ftamhar/nrpc v0.0.0-20221003231153-61127677ea3c
+	github.com/ftamhar/nrpc v0.1.0
 	github.com/google/uuid v1.3.0
 	github.com/nats-io/nats.go v1.17.0
 	google.golang.org/protobuf v1.28.1

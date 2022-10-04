@@ -5,7 +5,7 @@ docker-compose up -d
 ```
 
 ```
-go install github.com/ftamhar/nrpc/protoc-gen-nrpc@latest
+go install github.com/ftamhar/nrpc/protoc-gen-nrpc@v0.1.0
 ```
 
 ```

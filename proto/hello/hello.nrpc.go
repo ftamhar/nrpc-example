@@ -8,9 +8,9 @@ import (
 	"log"
 	"time"
 
-	"google.golang.org/protobuf/proto"
-	"github.com/nats-io/nats.go"
 	"github.com/ftamhar/nrpc"
+	"github.com/nats-io/nats.go"
+	"google.golang.org/protobuf/proto"
 )
 
 // HelloServicesServer is the interface that providers of the service
@@ -23,18 +23,18 @@ type HelloServicesServer interface {
 // HelloServicesHandler provides a NATS subscription handler that can serve a
 // subscription using a given HelloServicesServer implementation.
 type HelloServicesHandler struct {
-	ctx     context.Context
-	workers *nrpc.WorkerPool
-	nc      nrpc.NatsConn
-	server  HelloServicesServer
+	ctx       context.Context
+	workers   *nrpc.WorkerPool
+	nc        nrpc.NatsConn
+	server    HelloServicesServer
 	encodings []string
 }
 
 func NewHelloServicesHandler(ctx context.Context, nc nrpc.NatsConn, s HelloServicesServer) *HelloServicesHandler {
 	return &HelloServicesHandler{
-		ctx:    ctx,
-		nc:     nc,
-		server: s,
+		ctx:       ctx,
+		nc:        nc,
+		server:    s,
 		encodings: []string{"protobuf"},
 	}
 }
@@ -88,7 +88,7 @@ func (h *HelloServicesHandler) Handler(msg *nats.Msg) {
 		if err := nrpc.Unmarshal(request.Encoding, msg.Data, req); err != nil {
 			log.Printf("GreetingHandler: Greeting request unmarshal failed: %v", err)
 			immediateError = &nrpc.Error{
-				Type: nrpc.Error_CLIENT,
+				Type:    nrpc.Error_CLIENT,
 				Message: "bad request received: " + err.Error(),
 			}
 		} else {
@@ -110,7 +110,7 @@ func (h *HelloServicesHandler) Handler(msg *nats.Msg) {
 		if err := nrpc.Unmarshal(request.Encoding, msg.Data, req); err != nil {
 			log.Printf("UploadHandler: Upload request unmarshal failed: %v", err)
 			immediateError = &nrpc.Error{
-				Type: nrpc.Error_CLIENT,
+				Type:    nrpc.Error_CLIENT,
 				Message: "bad request received: " + err.Error(),
 			}
 		} else {
@@ -125,7 +125,7 @@ func (h *HelloServicesHandler) Handler(msg *nats.Msg) {
 	default:
 		log.Printf("HelloServicesHandler: unknown name %q", name)
 		immediateError = &nrpc.Error{
-			Type: nrpc.Error_CLIENT,
+			Type:    nrpc.Error_CLIENT,
 			Message: "unknown name: " + name,
 		}
 	}
@@ -149,28 +149,28 @@ func (h *HelloServicesHandler) Handler(msg *nats.Msg) {
 }
 
 type HelloServicesClient struct {
-	nc      nrpc.NatsConn
-	Subject string
+	nc       nrpc.NatsConn
+	Subject  string
 	Encoding string
-	Timeout time.Duration
+	Timeout  time.Duration
 }
 
 func NewHelloServicesClient(nc nrpc.NatsConn) *HelloServicesClient {
 	return &HelloServicesClient{
-		nc:      nc,
-		Subject: "HelloServices",
+		nc:       nc,
+		Subject:  "HelloServices",
 		Encoding: "protobuf",
-		Timeout: 5 * time.Second,
+		Timeout:  5 * time.Second,
 	}
 }
 
-func (c *HelloServicesClient) Greeting(req *GreetingRequest) (resp *GreetingResponse, err error) {
+func (c *HelloServicesClient) Greeting(ctx context.Context, req *GreetingRequest) (resp *GreetingResponse, err error) {
 
 	subject := c.Subject + "." + "Greeting"
 
 	// call
 	resp = new(GreetingResponse)
-	err = nrpc.Call(req, resp, c.nc, subject, c.Encoding, c.Timeout)
+	err = nrpc.Call(ctx, req, resp, c.nc, subject, c.Encoding)
 	if err != nil {
 		return // already logged
 	}
@@ -178,13 +178,13 @@ func (c *HelloServicesClient) Greeting(req *GreetingRequest) (resp *GreetingResp
 	return
 }
 
-func (c *HelloServicesClient) Upload(req *UploadRequest) (resp *UploadResponse, err error) {
+func (c *HelloServicesClient) Upload(ctx context.Context, req *UploadRequest) (resp *UploadResponse, err error) {
 
 	subject := c.Subject + "." + "Upload"
 
 	// call
 	resp = new(UploadResponse)
-	err = nrpc.Call(req, resp, c.nc, subject, c.Encoding, c.Timeout)
+	err = nrpc.Call(ctx, req, resp, c.nc, subject, c.Encoding)
 	if err != nil {
 		return // already logged
 	}
@@ -193,17 +193,17 @@ func (c *HelloServicesClient) Upload(req *UploadRequest) (resp *UploadResponse, 
 }
 
 type Client struct {
-	nc      nrpc.NatsConn
+	nc              nrpc.NatsConn
 	defaultEncoding string
-	defaultTimeout time.Duration
-	HelloServices *HelloServicesClient
+	defaultTimeout  time.Duration
+	HelloServices   *HelloServicesClient
 }
 
 func NewClient(nc nrpc.NatsConn) *Client {
 	c := Client{
-		nc: nc,
+		nc:              nc,
 		defaultEncoding: "protobuf",
-		defaultTimeout: 5*time.Second,
+		defaultTimeout:  5 * time.Second,
 	}
 	c.HelloServices = NewHelloServicesClient(nc)
 	return &c

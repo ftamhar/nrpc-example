@@ -26,7 +26,7 @@ func main() {
 	cli := hello.NewHelloServicesClient(nc)
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		res, err := cli.Greeting(&hello.GreetingRequest{
+		res, err := cli.Greeting(r.Context(), &hello.GreetingRequest{
 			Firstname: "Rahmat",
 			Lastname:  "Fathoni",
 		})
@@ -45,7 +45,7 @@ func main() {
 			w.Write([]byte("coba"))
 			return
 		}
-		res, err := cli.Upload(&hello.UploadRequest{
+		res, err := cli.Upload(r.Context(), &hello.UploadRequest{
 			Data: b,
 		})
 		if err != nil {
