@@ -17,7 +17,7 @@ func main() {
 		natsURL = os.Args[1]
 	}
 	// Connect to the NATS server.
-	nc, err := nats.Connect(natsURL, nats.Timeout(5*time.Second), nats.SyncQueueLen(1))
+	nc, err := nats.Connect(natsURL, nats.Timeout(5*time.Second))
 	if err != nil {
 		log.Fatal(err)
 	}
